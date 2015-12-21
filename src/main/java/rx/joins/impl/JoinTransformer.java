@@ -53,7 +53,7 @@ public class JoinTransformer<KEY, LEFT_VALUE, RIGHT_VALUE, RESULT> implements Ob
      */
     @Override
     public Observable<RESULT> call(final Observable<LEFT_VALUE> leftObservable) {
-        final ZipType zipType = joinToZip(joinType);
+        final ZipType zipType = joinType.toZipType();
         final Observable<List<LEFT_VALUE>> bufferedLeftObservable = leftObservable.compose(AggregationOperators.bufferByKey(leftHandKeyingFunction));
         final Observable<List<RIGHT_VALUE>> bufferedRightObservable = rightHandSide.compose(AggregationOperators.bufferByKey(rightHandKeyingFunction));
         return Observable.concat(
@@ -67,33 +67,6 @@ public class JoinTransformer<KEY, LEFT_VALUE, RIGHT_VALUE, RESULT> implements Ob
                         zipType
                 ))
         );
-    }
-
-
-    /**
-     * Returns a ZipType given a JoinType.
-     * @param joinType
-     * @return
-     */
-    public static ZipType joinToZip(final JoinType joinType) {
-        final ZipType zipType;
-        switch (joinType) {
-            case FULL_INNER: {
-                zipType = ZipType.INNER;
-                break;
-            }
-            case FULL_OUTER: {
-                zipType = ZipType.OUTER;
-                break;
-            }
-            case LEFT: {
-                zipType = ZipType.LEFT;
-                break;
-            }
-            default:
-                throw new IllegalStateException("Unknown zip type");
-        }
-        return zipType;
     }
 
     /**

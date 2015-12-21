@@ -7,8 +7,10 @@ import conductor.rx.ordered.flow.join.ZipType;
 import org.junit.Test;
 import rx.Observable;
 import rx.Scheduler;
+import rx.exceptions.MissingBackpressureException;
 import rx.functions.Func1;
 import rx.functions.Func2;
+import rx.internal.util.RxRingBuffer;
 import rx.observers.TestSubscriber;
 import rx.ordered.internal.util.Duple;
 import rx.schedulers.Schedulers;
@@ -643,6 +645,32 @@ public class OrderedZipOperatorsTest {
                 "1 - 1l - 1 - 1r",
                 "2 - 2l - 2 - 2r"
         );
+    }
+
+    @Test
+    public void testJoinWithoutBackpressureInUpstreamSubscriberThrowsBackpressureExceptions() {
+        Observable<Integer> observableSide1 = Observable.create((subscriber) -> {
+            subscriber.onStart();
+            for (int i = 1; i < RxRingBuffer.SIZE + 20; i++) {
+                subscriber.onNext(i);
+            }
+            subscriber.onCompleted();
+        });
+        Observable<String> observableSide2 = Observable.range(1, 5).map(String::valueOf);
+
+        Observable<String> joinedObservable = OrderedZipOperators.zip(observableSide1, observableSide2, Ordering.<Integer>natural(), integer -> integer, Integer::valueOf, new Func2<Integer, String, String>() {
+            @Override
+            public String call(Integer integer, String s) {
+                return integer + " - " + s;
+            }
+        }, ZipType.INNER);
+
+        TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+        joinedObservable.subscribe(testSubscriber);
+        testSubscriber.assertTerminalEvent();
+        testSubscriber.assertError(MissingBackpressureException.class);
+        testSubscriber.assertNoValues();
+        testSubscriber.assertUnsubscribed();
     }
 
     static Observable<Duple<Integer, String>> generateObservable(final int start, final int end, final String suffix) {

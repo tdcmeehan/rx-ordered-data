@@ -3,7 +3,9 @@ package rx.operators;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
 import conductor.rx.ordered.flow.join.JoinType;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import rx.Observable;
 import rx.functions.Func1;
 import rx.functions.Func2;
@@ -16,12 +18,10 @@ import static org.junit.Assert.assertNull;
 
 public class JoinOperatorsTest {
 
-    private static final Func1<Integer, Integer> IDENTITY = new Func1<Integer, Integer>() {
-        @Override
-        public Integer call(Integer integer) {
-            return integer;
-        }
-    };
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
+
+    private static final Func1<Integer, Integer> IDENTITY = integer -> integer;
 
     static final List<Duple<Integer, String>> JOIN_SIDE_1 = ImmutableList.of(
             new Duple<>(1, "one"),
@@ -232,5 +232,18 @@ public class JoinOperatorsTest {
 
         OrderedZipOperatorsTest.assertSubscriberFinished(testSubscriber);
         testSubscriber.assertNoValues();
+    }
+
+    @Test
+    public void testStaticJoin() {
+        Observable<Integer> side1 = Observable.range(1, 10).filter((item) -> item % 2 == 0);
+        Observable<Integer> side2 = Observable.range(1, 10);
+
+        TestSubscriber<Integer> testSubscriber = new TestSubscriber<>();
+        Observable<Integer> joinedObs =
+                JoinOperators.join(side1, side2, Ordering.natural(), Integer::intValue, Integer::intValue, (intSide1, intSide2) -> intSide1, JoinType.LEFT);
+        joinedObs.subscribe(testSubscriber);
+
+        testSubscriber.assertValues(2, 4, 6, 8, 10);
     }
 }

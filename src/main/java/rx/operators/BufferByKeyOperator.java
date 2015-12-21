@@ -9,34 +9,21 @@ import rx.functions.Func1;
 import java.util.List;
 
 /**
- * An operator which groups the incoming Observable into emissions of lists of values
- *
- * Created by tmeehan on 12/12/15.
- */
-/**
  * An operator which groups the incoming Observable into emissions of lists of values.
  *
  * Created by tmeehan on 12/12/15.
  */
 class BufferByKeyOperator<T, K> implements Observable.Operator<List<T>, T> {
     private final Func1<? super T, K> keyFunction;
-    private final Func1<List<?>, List<?>> arrayCopyStrategy;
+    private final Func1<List<T>, List<T>> listCopyStrategy;
 
-    private static final Func1<List<?>, List<?>> MUTABLE_STRATEGY = Lists::newArrayList;
+    public BufferByKeyOperator(final Func1<? super T, K> keyFunction) {
+        this(keyFunction, ImmutableList::copyOf);
+    }
 
-    private static final Func1<List<?>, List<?>> IMMUTABLE_STRATEGY = ImmutableList::copyOf;
-
-    private BufferByKeyOperator(final Func1<? super T, K> keyFunction, final Func1<List<?>, List<?>> arrayCopyStrategy) {
+    public BufferByKeyOperator(final Func1<? super T, K> keyFunction, final Func1<List<T>, List<T>> listCopyStrategy) {
         this.keyFunction = keyFunction;
-        this.arrayCopyStrategy = arrayCopyStrategy;
-    }
-
-    public static <T, K> BufferByKeyOperator<T, K> toMutableList(final Func1<? super T, K> keyFunction) {
-        return new BufferByKeyOperator<>(keyFunction, MUTABLE_STRATEGY);
-    }
-
-    public static <T, K> BufferByKeyOperator<T, K> toImmutableList(final Func1<? super T, K> keyFunction) {
-        return new BufferByKeyOperator<>(keyFunction, IMMUTABLE_STRATEGY);
+        this.listCopyStrategy = listCopyStrategy;
     }
 
     @Override
@@ -48,7 +35,7 @@ class BufferByKeyOperator<T, K> implements Observable.Operator<List<T>, T> {
             @SuppressWarnings("unchecked")
             public void onCompleted() {
                 if (!objects.isEmpty()) {
-                    downstreamSubscriber.onNext((List<T>) arrayCopyStrategy.call(objects));
+                    downstreamSubscriber.onNext(listCopyStrategy.call(objects));
                     objects.clear();
                 }
                 downstreamSubscriber.onCompleted();
@@ -67,7 +54,7 @@ class BufferByKeyOperator<T, K> implements Observable.Operator<List<T>, T> {
                     request(1);
                 }
                 else {
-                    downstreamSubscriber.onNext((List<T>) arrayCopyStrategy.call(objects));
+                    downstreamSubscriber.onNext(listCopyStrategy.call(objects));
                     objects.clear();
                     objects.add(t);
                 }
