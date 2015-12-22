@@ -1,1 +1,4 @@
+*.iml
+.idea/*
+target/*
 /rx-ordered-data.iml

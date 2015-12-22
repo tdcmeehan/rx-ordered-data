@@ -1,6 +1,10 @@
 sudo: false
 language: java
 
+env:
+  global:
+    secure: "XFKiOOj8m5MeQhqjGlP3XTNh5NZEsAixhfSFs3Z01q6taTVAiSc4zY8nSI5Rg4g2fkNQDs+r7F1OXEt1Qv4IWBu9asAxvTZE4yCkz6nIiObxnXQPpoPRq9hfZvIS4cYsZDm80PWW7ny1yMY+vfXvw9DMZgWLphDt0KMnulKkeDof3s0oJVSMHvSnvbgFEOKjsBWGe9nVOBvTG30V9hBTzcMmddleBplzBXC+AyVqU767sAJsDbIk0r9OLpMXtka9k+YXnw1hdJvAEwYbOXAWIZYtGA+cyTbwSJjFp1AjhdcUecomRwpjRubpHwuEl+6U1phLhBztaSxKkP0TYUfugve7QIOlxpQv6Y/P2Quzk4QXRpTFx2HKqcbxCYJifVoNT3guC/ydYHVOeeuKgPfrOiaRN123gBWbyP6BV8uvJkFelxOnubQ9llZTj1kSsGXzhVvGDOo75HuDXEBA8Kg+Pe0EKH/VcMJVMWEO+cg7pm4ogTjpIHP0uyK3hqdWxS5tF/Byiov8ctTAvExfLblIlTLEZLpAHvYu819eu3lBSFtfLO+iAYl/S1hFVvNLThGW33OpeVdB+CY3Am7yIuru8vwMNCadMppnLdFFu7dXRNY8O4d07hwSItr3Ndi/3P015aSUvtQIZ9LyVy5B8MZWD+n7DX7XBxCqdgwsDCpxYh4="
+
 jdk:
   - openjdk6
 
@@ -18,6 +22,7 @@ cache:
 
 after_success:
   - ./gradlew jacocoTestReport coveralls
+  - ./initiate-publish.sh
 
 notifications:
   slack: conductor:EKe0LQQORVPJv35NmeqP48Mv

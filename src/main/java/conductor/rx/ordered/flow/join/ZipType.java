@@ -1,9 +1,9 @@
 package conductor.rx.ordered.flow.join;
 
 /**
- * Supported join types.  This is different from {@link conductor.core.io.streaming.processors.flow.join.JoinType} in that these do not represent full SQL joins, but
+ * Supported join types.  This is different from {@link conductor.rx.ordered.flow.join.JoinType} in that these do not represent full SQL joins, but
  * item-by-item joining of data.  Implicit is that keys are unique in each stream; if the keys are not unique, then the
- * behavior is undefined.  Use constructs that employ {@link conductor.core.io.streaming.processors.flow.join.JoinType} if you anticipate duplicate keys or choose not
+ * behavior is undefined.  Use constructs that employ {@link conductor.rx.ordered.flow.join.JoinType} if you anticipate duplicate keys or choose not
  * to aggregate them before hand.
  */
 public enum ZipType {
