@@ -22,6 +22,7 @@ cache:
 
 after_success:
   - ./gradlew jacocoTestReport coveralls
+  - chmod +x initiate-publish.sh
   - ./initiate-publish.sh
 
 notifications:
