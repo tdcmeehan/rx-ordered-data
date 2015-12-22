@@ -22,6 +22,7 @@ cache:
 
 after_success:
   - ./gradlew jacocoTestReport coveralls
+  - export JAVA_HOME=$JAVA8_HOME
   - chmod +x initiate-publish.sh
   - ./initiate-publish.sh
 
