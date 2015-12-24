@@ -6,7 +6,6 @@ import conductor.rx.ordered.flow.join.ZipType;
 import org.junit.Test;
 import rx.Observable;
 import rx.Scheduler;
-import rx.functions.Action0;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.observers.TestSubscriber;
@@ -20,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 
 public class OrderedZipOperatorsIntegrationTest {
 
-    private static final int MAX_RUNS = 1000;
+    private static final int MAX_RUNS = 100;
 
     @Test
     public void testJoinOnTwoThreads() throws Exception {
@@ -96,7 +95,7 @@ public class OrderedZipOperatorsIntegrationTest {
             Observable<INPUT> observable2,
             Func1<INPUT, Integer> keyingFunction,
             Func2<INPUT, INPUT, OUTPUT> joinFunction
-    ) {
+    ) throws Exception {
         assertJoinInThreeSchedulers(observable1, observable2, keyingFunction, joinFunction, null);
     }
 
@@ -105,8 +104,9 @@ public class OrderedZipOperatorsIntegrationTest {
             Observable<INPUT> observable2,
             Func1<INPUT, Integer> keyingFunction,
             Func2<INPUT, INPUT, OUTPUT> joinFunction,
-            Scheduler scheduler) {
-        TestSubscriber<OUTPUT> testSubscriber = new TestSubscriber<OUTPUT>();
+            Scheduler scheduler) throws Exception {
+        final TestSubscriber<OUTPUT> testSubscriber = new TestSubscriber<>();
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
 
         Observable<OUTPUT> joinedObservable = observable1
                 .compose(OrderedZipOperators.zipWith(
@@ -122,19 +122,9 @@ public class OrderedZipOperatorsIntegrationTest {
             joinedObservable = joinedObservable.subscribeOn(scheduler);
         }
 
-        final CountDownLatch countDownLatch = new CountDownLatch(1);
-        joinedObservable.doOnUnsubscribe(new Action0() {
-            @Override
-            public void call() {
-                countDownLatch.countDown();
-            }
-        }).subscribe(testSubscriber);
-        testSubscriber.awaitTerminalEvent(10, TimeUnit.SECONDS);
-        try {
-            countDownLatch.await(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        joinedObservable.doOnUnsubscribe(countDownLatch::countDown).subscribe(testSubscriber);
+        testSubscriber.awaitTerminalEvent(1, TimeUnit.SECONDS);
+        countDownLatch.await(1, TimeUnit.SECONDS);
 
         OrderedZipOperatorsTest.assertSubscriberFinished(testSubscriber);
 
@@ -156,8 +146,9 @@ public class OrderedZipOperatorsIntegrationTest {
     }
 
     @Test
-    public void testJoinOneSideFaster() {
-        TestSubscriber<String> testSubscriber = new TestSubscriber<String>();
+    public void testJoinOneSideFaster() throws Exception {
+        TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+        CountDownLatch countDownLatch = new CountDownLatch(1);
 
         Observable<Duple<Integer, String>> observable1 = OrderedZipOperatorsTest.generateObservable(1, 1000, "l", Schedulers.io());
         Observable<Duple<Integer, String>> observable2 = OrderedZipOperatorsTest.generateObservable(1, 1000, "r", Schedulers.io())
@@ -172,9 +163,11 @@ public class OrderedZipOperatorsIntegrationTest {
                         OrderedZipOperatorsTest.JOIN_FUNCTION,
                         ZipType.LEFT
                 ))
-                .subscribe(testSubscriber);
+                .doOnUnsubscribe(countDownLatch::countDown).subscribe(testSubscriber);
 
         testSubscriber.awaitTerminalEvent(10, TimeUnit.SECONDS);
+        countDownLatch.await(10, TimeUnit.SECONDS);
+
         OrderedZipOperatorsTest.assertSubscriberFinished(testSubscriber);
 
         testSubscriber.assertValueCount(1000);
@@ -195,13 +188,15 @@ public class OrderedZipOperatorsIntegrationTest {
     }
 
     @Test
-    public void testJoinOtherSideFaster() {
-        TestSubscriber<String> testSubscriber = new TestSubscriber<String>();
+    public void testJoinOtherSideFaster() throws Exception {
+        final TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
 
         Observable<Duple<Integer, String>> observable1 = OrderedZipOperatorsTest.generateObservable(1, 1000, "l", Schedulers.io())
                 .filter(OrderedZipOperatorsTest.FILTER_ODD_VALUES)
                 .delay(500, TimeUnit.MILLISECONDS);
         Observable<Duple<Integer, String>> observable2 = OrderedZipOperatorsTest.generateObservable(1, 1000, "r", Schedulers.io());
+
         observable1
                 .compose(OrderedZipOperators.zipWith(
                         observable2,
@@ -211,9 +206,10 @@ public class OrderedZipOperatorsIntegrationTest {
                         OrderedZipOperatorsTest.JOIN_FUNCTION,
                         ZipType.INNER
                 ))
-                .subscribe(testSubscriber);
+                .doOnUnsubscribe(countDownLatch::countDown).subscribe(testSubscriber);
 
         testSubscriber.awaitTerminalEvent(10, TimeUnit.SECONDS);
+        countDownLatch.await(10, TimeUnit.SECONDS);
         OrderedZipOperatorsTest.assertSubscriberFinished(testSubscriber);
 
         testSubscriber.assertValueCount(500);
@@ -237,7 +233,7 @@ public class OrderedZipOperatorsIntegrationTest {
     public void testJoinOnTwoThreadsEmptyLeftStream() throws Exception {
         // Run this repeatedly to attempt to unearth random threading issues (in case any crop up in the future)
         for (int i = 0; i < MAX_RUNS; i++) {
-            TestSubscriber<String> testSubscriber = new TestSubscriber<String>();
+            TestSubscriber<String> testSubscriber = new TestSubscriber<>();
             Observable<Duple<Integer, String>> observable1 = Observable.just(new Duple<>(1, "1")).subscribeOn(Schedulers.io());
             Observable<Duple<Integer, String>> observable2 = Observable.<Duple<Integer, String>>empty().subscribeOn(Schedulers.io());
 
@@ -249,7 +245,7 @@ public class OrderedZipOperatorsIntegrationTest {
     public void testJoinOnTwoThreadsEmptyRightStream() throws Exception {
         // Run this repeatedly to attempt to unearth random threading issues (in case any crop up in the future)
         for (int i = 0; i < MAX_RUNS; i++) {
-            TestSubscriber<String> testSubscriber = new TestSubscriber<String>();
+            TestSubscriber<String> testSubscriber = new TestSubscriber<>();
             Observable<Duple<Integer, String>> observable1 = Observable.<Duple<Integer, String>>empty().subscribeOn(Schedulers.io());
             Observable<Duple<Integer, String>> observable2 = Observable.just(new Duple<>(1, "1")).subscribeOn(Schedulers.io());
 
@@ -269,15 +265,10 @@ public class OrderedZipOperatorsIntegrationTest {
         );
 
         final CountDownLatch countDownLatch = new CountDownLatch(1);
-        joinedObservable.doOnUnsubscribe(new Action0() {
-            @Override
-            public void call() {
-                countDownLatch.countDown();
-            }
-        }).subscribe(testSubscriber);
+        joinedObservable.doOnUnsubscribe(countDownLatch::countDown).subscribe(testSubscriber);
 
-        testSubscriber.awaitTerminalEvent(10, TimeUnit.SECONDS);
-        countDownLatch.await(10, TimeUnit.SECONDS);
+        testSubscriber.awaitTerminalEvent(1, TimeUnit.SECONDS);
+        countDownLatch.await(1, TimeUnit.SECONDS);
 
         OrderedZipOperatorsTest.assertSubscriberFinished(testSubscriber);
         testSubscriber.assertValueCount(1);
