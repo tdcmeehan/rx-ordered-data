@@ -39,6 +39,7 @@ dependencies {
 javadoc {
     source = sourceSets.main.allJava
     classpath = configurations.compile
+    options.links 'http://docs.oracle.com/javase/6/docs/api/', 'http://reactivex.io/RxJava/javadoc/'
 }
 
 jacocoTestReport {
