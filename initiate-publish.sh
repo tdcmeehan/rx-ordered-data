@@ -3,7 +3,7 @@
 set -e
 
 if [[ $TRAVIS_BRANCH == 'master' && $TRAVIS_REPO_SLUG == "Conductor/rx-ordered-data" && $TRAVIS_PULL_REQUEST == 'false' ]]; then
-    ./gradlew uploadArchives -PnexusUsername="${NEXUS_USERNAME}" -PnexusPassword="${NEXUS_PASSWORD}"
+    ./gradlew uploadArchives -PnexusUsername="${SONATYPE_USERNAME}" -PnexusPassword="${SONATYPE_PASSWORD}"
     RETVAL=$?
 
     if [ $RETVAL -eq 0 ]; then
