@@ -22,7 +22,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * a consistent and specified order.
  *
  * Adapted from code written by David Karnok &lt;akarnokd@gmail.com&gt;:
- *  {@link <a href="https://gist.github.com/akarnokd/c86a89738199bbb37348">SortedMerge.java</a>}
+ *  <a href="https://gist.github.com/akarnokd/c86a89738199bbb37348">SortedMerge.java</a>
  *
  * @param <T> the entity type
  */

@@ -9,16 +9,20 @@ buildscript {
     repositories {
         maven { url "http://central" }
         mavenCentral()
+        jcenter()
     }
 
     dependencies {
         classpath 'me.tatarka:gradle-retrolambda:3.2.4'
         classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.0.1'
+        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.6.1'
     }
 }
 
 assert System.getenv("JAVA8_HOME") : "retrolambda needs an explicitly defined JAVA8_HOME in the current environment"
 assert System.getenv("JAVA6_HOME") : "retrolambda needs an explicitly defined JAVA6_HOME in the current environment"
+
+apply from: 'gradle/publish.gradle'
 
 apply plugin: 'java'
 apply plugin: 'me.tatarka.retrolambda'
