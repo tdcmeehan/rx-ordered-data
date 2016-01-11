@@ -1,5 +1,5 @@
-conductor.rx.ordered.flow.join
-rx.joins.impl
-rx.operators
-rx.ordered.internal.util
-rx.orderedzip.impl
+com.conductor.rx.joins.impl
+com.conductor.rx.operators
+com.conductor.rx.ordered.flow.join
+com.conductor.rx.ordered.internal.util
+com.conductor.rx.orderedzip.impl
