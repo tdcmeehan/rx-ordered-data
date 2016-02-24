@@ -1,7 +1,6 @@
 package com.conductor.rx.orderedzip.impl;
 
 import com.conductor.rx.ordered.flow.join.ZipType;
-import com.conductor.rx.ordered.internal.util.Duple;
 import rx.Observable;
 import rx.functions.Func1;
 import rx.functions.Func2;
@@ -10,7 +9,7 @@ import java.util.Comparator;
 
 /**
  * A Transformer which takes in a right hand stream and transforms the current stream into a result stream.  This
- * primarily delegates to {@link OrderedZipOperator}.
+ * primarily delegates to {@link OrderedZipOnSubscribe}.
  */
 public final class OrderedZipTransformer<KEY, LEFT_VALUE, RIGHT_VALUE, RESULT> implements Observable.Transformer<LEFT_VALUE, RESULT> {
     private final Observable<RIGHT_VALUE> rightHandSide;
@@ -38,7 +37,9 @@ public final class OrderedZipTransformer<KEY, LEFT_VALUE, RIGHT_VALUE, RESULT> i
 
     @Override
     public final Observable<RESULT> call(final Observable<LEFT_VALUE> leftHandSide) {
-        return Observable.just((new Duple<>(leftHandSide, rightHandSide))).lift(new OrderedZipOperator<>(
+        return Observable.create(OrderedZipOnSubscribe.create(
+                leftHandSide,
+                rightHandSide,
                 comparator,
                 leftHandKeyingFunction,
                 rightHandKeyingFunction,
