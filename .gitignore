@@ -1,5 +1,4 @@
 *.iml
-.idea/*
+.idea
 target/*
-build/*
 /rx-ordered-data.iml

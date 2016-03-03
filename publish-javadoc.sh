@@ -4,7 +4,7 @@ set -e
 
 if [[ $TRAVIS_BRANCH == 'master' && $TRAVIS_REPO_SLUG == "Conductor/rx-ordered-data" && $TRAVIS_PULL_REQUEST == 'false' ]]; then
 
-    ./gradlew javadoc
+    mvn javadoc:javadoc
 
     # Get to the Travis build directory, configure git and clone the repo
     cd $HOME
@@ -15,7 +15,7 @@ if [[ $TRAVIS_BRANCH == 'master' && $TRAVIS_REPO_SLUG == "Conductor/rx-ordered-d
     # Commit and Push the Changes
     cd gh-pages
     git rm -rf ./javadoc
-    cp -Rf $TRAVIS_BUILD_DIR/build/docs/javadoc ./javadoc
+    cp -Rf $TRAVIS_BUILD_DIR/target/site/apidocs ./javadoc # target/site/apidocs
     git add -f .
     git commit -m "Lastest javadoc on successful travis build $TRAVIS_BUILD_NUMBER auto-pushed to gh-pages"
     git push -fq origin gh-pages > /dev/null

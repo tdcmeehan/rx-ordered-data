@@ -14,7 +14,9 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Created by tmeehan on 9/1/15.
+ * An RxJava transformer which performs SQL-like joins on pre-sorted Observable data.
+ *
+ * @author tmeehan
  */
 public class JoinTransformer<KEY, LEFT_VALUE, RIGHT_VALUE, RESULT> implements Observable.Transformer<LEFT_VALUE, RESULT> {
 

@@ -1,6 +1,5 @@
 package com.conductor.rx.operators;
 
-import com.conductor.rx.operators.OrderedZipOperators;
 import com.conductor.rx.ordered.flow.join.ZipType;
 import com.conductor.rx.ordered.internal.util.Duple;
 import com.google.common.collect.FluentIterable;
@@ -659,12 +658,7 @@ public class OrderedZipOperatorsTest {
         });
         Observable<String> observableSide2 = Observable.range(1, 5).map(String::valueOf);
 
-        Observable<String> joinedObservable = OrderedZipOperators.zip(observableSide1, observableSide2, Ordering.<Integer>natural(), integer -> integer, Integer::valueOf, new Func2<Integer, String, String>() {
-            @Override
-            public String call(Integer integer, String s) {
-                return integer + " - " + s;
-            }
-        }, ZipType.INNER);
+        Observable<String> joinedObservable = OrderedZipOperators.zip(observableSide1, observableSide2, Ordering.<Integer>natural(), integer -> integer, Integer::valueOf, (integer, s) -> integer + " - " + s, ZipType.INNER);
 
         TestSubscriber<String> testSubscriber = new TestSubscriber<>();
         joinedObservable.subscribe(testSubscriber);

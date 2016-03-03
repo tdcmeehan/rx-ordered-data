@@ -15,16 +15,8 @@ before_install:
   - export JAVA8_HOME=/usr/lib/jvm/java-8-oracle
   - export JAVA_HOME=$JAVA8_HOME
 
-before_cache:
-  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
-
-cache:
-  directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
-
 after_success:
-  - ./gradlew jacocoTestReport coveralls
+  - mvn test jacoco:report coveralls:report
   - chmod +x publish-javadoc.sh
   - ./publish-javadoc.sh
   - chmod +x initiate-publish.sh
