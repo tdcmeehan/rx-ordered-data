@@ -175,7 +175,7 @@
                     <useReleaseProfile>false</useReleaseProfile>
                     <arguments>-Psonatype-oss-release</arguments>
                     <checkModificationExcludes>
-                        <checkModificationExclude>pom.xml</checkModificationExclude>
+                        <checkModificationExclude>publish-javadoc.sh</checkModificationExclude>
                         <checkModificationExclude>initiate-publish.sh</checkModificationExclude>
                     </checkModificationExcludes>
                 </configuration>
