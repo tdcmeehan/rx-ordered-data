@@ -4,7 +4,7 @@
 
     <groupId>com.conductor</groupId>
     <artifactId>rx-ordered-data</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.2</version>
 
     <name>RX Ordered Data</name>
     <url>https://github.com/Conductor/rx-ordered-data</url>
@@ -39,7 +39,7 @@
         <connection>scm:git:https://github.com/Conductor/rx-ordered-data.git</connection>
         <developerConnection>scm:git:git@github.com:Conductor/rx-ordered-data.git</developerConnection>
         <url>https://github.com/Conductor/rx-ordered-data</url>
-        <tag>HEAD</tag>
+        <tag>rx-ordered-data-0.0.2-alpha1</tag>
     </scm>
 
     <distributionManagement>
